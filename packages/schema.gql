@@ -4,6 +4,7 @@
 
 type Book {
   author: String!
+  id: String!
   publishedDate: Boolean!
   title: String!
 }
@@ -14,13 +15,36 @@ input BookInput {
   title: String!
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
   createBook(input: BookInput!): Book!
+  createUser(input: UserInput!): User!
   deleteBook(id: ID!): Book!
+  login(input: LoginInput!): User!
   updateBook(id: ID!, input: BookInput!): Book!
 }
 
 type Query {
   book(id: ID!): Book!
   books: [Book!]!
+  user(id: ID!): User!
+  users: [User!]!
+}
+
+type User {
+  access_token: String!
+  email: String!
+  id: String!
+  name: String!
+  password: String!
+}
+
+input UserInput {
+  email: String!
+  name: String!
+  password: String!
 }

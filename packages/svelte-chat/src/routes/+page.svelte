@@ -18,7 +18,7 @@
 			</picture>
 		</span>
 
-		to your new<br />SvelteKit app
+		to<br />Givmessenger App
 	</h1>
 
 	<h2>

@@ -2,25 +2,28 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type BookDocument = Book & Document;
+export type UserDocument = User & Document;
 
 @ObjectType()
 @Schema()
-export class Book {
+export class User {
     @Field()
     id?: string;
 
     @Field()
     @Prop({ type: String })
-    title: string;
+    name: string;
+
+    @Field()
+    @Prop({ type: String, unique: true })
+    email: string;
 
     @Field()
     @Prop({ type: String })
-    author: string;
+    password: string;
 
     @Field()
-    @Prop({ type: Boolean })
-    publishedDate: boolean;
+    access_token?: string;
 }
 
-export const BookSchema = SchemaFactory.createForClass(Book);
+export const UserSchema = SchemaFactory.createForClass(User);
