@@ -2,12 +2,17 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Book } from './book.model';
 import { BookService } from 'src/books/books.service';
 import { BookInput } from 'src/books/book.input';
+import { JwtAuthGuard } from 'src/guards/jwtAuth.guard';
+import { UseGuards } from '@nestjs/common';
 
 @Resolver(() => Book)
 export class BookResolver {
-  constructor(private readonly bookService: BookService) {}
+  constructor(
+    private readonly bookService: BookService,
+  ) {}
 
   @Query(() => [Book])
+  @UseGuards(JwtAuthGuard)
   async books(): Promise<Book[]> {
     return this.bookService.findAll();
   }

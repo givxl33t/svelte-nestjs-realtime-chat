@@ -2,6 +2,10 @@
 	import Counter from './Counter.svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
+
+	export let data;
+
+	const books = data.props?.data.books;
 </script>
 
 <svelte:head>
@@ -19,6 +23,19 @@
 		</span>
 
 		<p class="text-3xl font-bold text-center pb-5">Givmessenger App</p>
+
+		<p class="text-2xl font-bold text-center pb-5">Books</p>
+		{#if books}
+			<ul>
+				{#each books as book}
+					<li class={book.publishedDate ? "text-teal-600" : "text-red-600"}>
+						{book.title} by {book.author} id: {book.id}
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p>No books found</p>
+		{/if}
 	</h1>
 
 	<h2>

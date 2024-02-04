@@ -39,6 +39,7 @@ import { JwtStrategy } from "src/guards/passportStrategy.guard";
       }),
     }),
   ],
+  exports: [JwtStrategy, NestJwtModule, UserService]
 })
 
 export class UsersModule {}
