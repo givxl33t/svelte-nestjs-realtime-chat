@@ -18,7 +18,7 @@
 			</picture>
 		</span>
 
-		to<br />Givmessenger App
+		<p class="text-3xl font-bold text-center pb-5">Givmessenger App</p>
 	</h1>
 
 	<h2>
