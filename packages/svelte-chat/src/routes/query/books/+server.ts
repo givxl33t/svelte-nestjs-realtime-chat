@@ -2,7 +2,7 @@ import { client } from '$lib/utilities/apolloClient';
 import { gql } from '@apollo/client/core/index.js';
 
 /** @type {import('./$types').RequestHandler} */
-export async function POST() {
+export async function POST({ request }) {
   try {
     const query = gql`
       query {
@@ -17,7 +17,12 @@ export async function POST() {
 
     const { data } = await client.query({
       query,
-      fetchPolicy: "no-cache"
+      fetchPolicy: "no-cache",
+      context: {
+        headers: {
+          authorization: request.headers.get("authorization"),
+        },
+      },
     });
 
     return new Response(JSON.stringify(data), {

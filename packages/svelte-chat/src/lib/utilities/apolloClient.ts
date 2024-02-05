@@ -20,9 +20,12 @@ class Client {
     });
 
     const authLink = setContext((_, { headers }) => {
+      const accessToken = headers?.authorization ?? "";
+
       return {
         headers: {
-          ...headers
+          ...headers,
+          authorization: accessToken,
         },
       };
     });

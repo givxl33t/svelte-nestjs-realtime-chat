@@ -1,11 +1,14 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
+import { browser } from "$app/environment"
+
 export async function load({ fetch }) {
+  const accessToken = browser && localStorage.getItem('access_token');
+
   try {
     const res = await fetch('/query/books', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `${accessToken ? `Bearer ${accessToken}` : ''}`,
       },
     });
 

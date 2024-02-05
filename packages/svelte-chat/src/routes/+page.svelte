@@ -25,17 +25,21 @@
 		<p class="text-3xl font-bold text-center pb-5">Givmessenger App</p>
 
 		<p class="text-2xl font-bold text-center pb-5">Books</p>
-		{#if books}
-			<ul>
-				{#each books as book}
-					<li class={book.publishedDate ? "text-teal-600" : "text-red-600"}>
-						{book.title} by {book.author} id: {book.id}
-					</li>
-				{/each}
-			</ul>
-		{:else}
-			<p>No books found</p>
-		{/if}
+		<div class="flex justify-center text-center">
+			{#if books}
+				<ul>
+					{#each books as book}
+						<li class="{book.publishedDate ? "text-teal-600" : "text-red-600"} my-3">
+							<p>ID : {book.id}</p>
+							<p>{book.title} by {book.author}</p>
+							<p>{book.publishedDate ? "Published" : "Not published"}</p>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p>No books found</p>
+			{/if}
+		</div>
 	</h1>
 
 	<h2>
