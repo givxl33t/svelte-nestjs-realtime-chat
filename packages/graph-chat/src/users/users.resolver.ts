@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { User } from './user.model';
 import { UserService } from './users.service';
 import { UserInput, LoginInput } from './user.input';
@@ -26,6 +26,13 @@ export class UserResolver {
     return this.userService.findOne(id);
   }
 
+  @Query(() => User)
+  @UseGuards(JwtAuthGuard)
+  async me(@Context() context): Promise<User> {
+    const userId = context.req.user.id;
+    return this.userService.findOne(userId);
+  }
+
   @Mutation(() => User)
   async createUser(@Args('input') input: UserInput): Promise<User> {
     const existingEmail = await this.userService.findByEmail(input.email);
@@ -48,7 +55,7 @@ export class UserResolver {
       throw new Error('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, name: user.name, sub: user.id,  };
     const access_token = this.jwtService.sign(payload);
     user.access_token = access_token;
     

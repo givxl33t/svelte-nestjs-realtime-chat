@@ -2,6 +2,9 @@
 	import Counter from './Counter.svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import { isAuthenticated } from '$lib/stores/auth';
+
+	$: isAuthenticatedValue = $isAuthenticated;
 
 	export let data;
 
@@ -26,18 +29,22 @@
 
 		<p class="text-2xl font-bold text-center pb-5">Books</p>
 		<div class="flex justify-center text-center">
-			{#if books}
-				<ul>
-					{#each books as book}
-						<li class="{book.publishedDate ? "text-teal-600" : "text-red-600"} my-3">
-							<p>ID : {book.id}</p>
-							<p>{book.title} by {book.author}</p>
-							<p>{book.publishedDate ? "Published" : "Not published"}</p>
-						</li>
-					{/each}
-				</ul>
+			{#if isAuthenticatedValue}
+				{#if books}
+					<ul>
+						{#each books as book}
+							<li class="{book.publishedDate ? "text-teal-600" : "text-red-600"} my-3">
+								<p>ID : {book.id}</p>
+								<p>{book.title} by {book.author}</p>
+								<p>{book.publishedDate ? "Published" : "Not published"}</p>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p>No books found</p>
+				{/if}
 			{:else}
-				<p>No books found</p>
+				<p>Please login to view books</p>
 			{/if}
 		</div>
 	</h1>

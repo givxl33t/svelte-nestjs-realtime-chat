@@ -6,11 +6,10 @@ export async function POST({ request }) {
   try {
     const query = gql`
       query {
-        books {
+        me {
           id
-          title
-          author
-          publishedDate
+          email
+          name
         }
       }
     `;

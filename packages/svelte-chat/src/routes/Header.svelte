@@ -1,14 +1,49 @@
+<!-- Header.svelte -->
 <script>
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { isAuthenticated, currentUser, updateCurrentUser } from '$lib/stores/auth';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
+
+	$: user = $currentUser;
+	$: isAuthenticatedValue = $isAuthenticated;
+
+	onMount(async () => {
+		if (isAuthenticatedValue) {
+			try {
+				const res = await fetch('/query/me', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+					}
+				});
+
+				user = await res.json();
+				updateCurrentUser(user);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+	})
+
+	const logout = () => {
+		localStorage.removeItem('access_token');
+		isAuthenticated.set(false);
+		location.reload();
+	};
 </script>
 
 <header>
 	<div class="corner">
-		<a href="https://kit.svelte.dev">
-			<img src={logo} alt="SvelteKit" />
-		</a>
+		{#if isAuthenticatedValue}
+		<p class="mt-2 ml-3 text-orange-500 font-semibold">{user.me.name}</p>
+		{:else}
+			<a href="https://kit.svelte.dev">
+				<img src={logo} alt="SvelteKit" />
+			</a>
+		{/if}
 	</div>
 
 	<nav>
@@ -19,9 +54,15 @@
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">Home</a>
 			</li>
-			<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
-				<a href="/login">Login</a>
-			</li>
+			{#if !isAuthenticatedValue}
+				<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
+					<a href="/login">Login</a>
+				</li>
+			{:else}
+				<li aria-current={$page.url.pathname === '/logout' ? 'page' : undefined}>
+					<a href="/" on:click={logout}>Logout</a>
+				</li>
+			{/if}
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
@@ -29,9 +70,9 @@
 	</nav>
 
 	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
-			<img src={github} alt="GitHub" />
-		</a>
+			<a href="https://github.com/sveltejs/kit">
+				<img src={github} alt="GitHub" />
+			</a>
 	</div>
 </header>
 
@@ -39,6 +80,7 @@
 	header {
 		display: flex;
 		justify-content: space-between;
+		overflow: hidden;
 	}
 
 	.corner {
