@@ -1,38 +1,47 @@
 <!-- Header.svelte -->
 <script>
+// @ts-nocheck
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { isAuthenticated, currentUser, updateCurrentUser } from '$lib/stores/auth';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
+	import { graphql } from '$houdini';
 
 	$: user = $currentUser;
 	$: isAuthenticatedValue = $isAuthenticated;
 
-	onMount(async () => {
-		if (isAuthenticatedValue) {
-			try {
-				const res = await fetch('/query/me', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-					}
-				});
-
-				user = await res.json();
-				updateCurrentUser(user);
-			} catch (error) {
-				console.error(error);
+	const store = graphql`
+		query Me @load {
+			me {
+				id
+				name
+				email
 			}
-		}
-	})
+		}`;
+		
+	onMount(async () => {
+		const user = await store.fetch();
+		updateCurrentUser(user.data);
+	});
 
-	const logout = () => {
-		localStorage.removeItem('access_token');
-		isAuthenticated.set(false);
-		location.reload();
-	};
+	async function handleLogout() {
+		const logout = graphql`
+			mutation Logout {
+				logout
+			}
+		`;
+
+		const res = await logout.mutate();
+
+		if (res.data.logout) {
+			localStorage.removeItem('access_token');
+			isAuthenticated.set(false);
+			updateCurrentUser(null);
+		} else {
+			console.error('Failed to logout');
+		}
+	}
 </script>
 
 <header>
@@ -60,7 +69,7 @@
 				</li>
 			{:else}
 				<li aria-current={$page.url.pathname === '/logout' ? 'page' : undefined}>
-					<a href="/" on:click={logout}>Logout</a>
+					<a href="/" on:click={handleLogout}>Logout</a>
 				</li>
 			{/if}
 		</ul>

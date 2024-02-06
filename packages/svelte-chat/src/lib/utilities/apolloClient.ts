@@ -1,7 +1,10 @@
 // @ts-nocheck
-import fetch from 'node-fetch';
-import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client/core/index.js";
+import { ApolloClient, HttpLink, InMemoryCache, split } from "@apollo/client/core/index.js";
 import { setContext } from '@apollo/client/link/context/index.js';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions/index.js';
+import { createClient } from 'graphql-ws';
+import { getMainDefinition } from '@apollo/client/utilities/index.js';
+import { browser } from "$app/environment"
 
 class Client {
   constructor() {
@@ -10,13 +13,12 @@ class Client {
     }
     Client._instance = this;
 
-    this.client = this.setupClient();
+    this.apolloClient = this.setupClient();
   }
 
   setupClient() {
-    const link = new HttpLink({
-      uri: 'http://localhost:5000/graphql',
-      fetch,
+    const httpLink = new HttpLink({
+      uri: 'http://localhost:5000/graphql'
     });
 
     const authLink = setContext((_, { headers }) => {
@@ -30,13 +32,35 @@ class Client {
       };
     });
 
-    const client = new ApolloClient({
-      link: authLink.concat(link),
+    const wsLink = browser
+      ? new GraphQLWsLink({
+        client: createClient({
+          url: 'ws://localhost:5000/graphql',
+          webSocketImpl: WebSocket,
+        }),
+      })
+      : null;
+
+    const link = 
+      browser && wsLink !== null
+        ? split(
+          ({ query }) => {
+            const definition = getMainDefinition(query);
+            return (
+              definition.kind === 'OperationDefinition' &&
+              definition.operation === 'subscription'
+            );
+          },
+          wsLink,
+          authLink.concat(httpLink),
+        )
+        : authLink.concat(httpLink);
+
+    return new ApolloClient({
+      link,
       cache: new InMemoryCache(),
     });
-
-    return client;
   }
 }
 
-export const client = (new Client()).client;
+export const client = new Client().apolloClient;

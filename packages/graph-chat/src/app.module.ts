@@ -23,9 +23,13 @@ import { BooksModule } from './books/books.module';
       driver: ApolloDriver,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        autoSchemaFile: join(process.cwd(), '../schema.gql'),
+        autoSchemaFile: join(process.cwd(), '../svelte-chat/schema.graphql'),
         context: ({ req, res }) => ({ req, res }),
         installSubscriptionHandlers: true,
+        subscriptions: {
+          "graphql-ws": true,
+          "subscriptions-transport-ws": true,
+        },
         sortSchema: true,
         playground: true,
         debug: configService.get<boolean>('DEBUG'),

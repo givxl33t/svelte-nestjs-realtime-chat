@@ -25,6 +25,7 @@ type Mutation {
   createUser(input: UserInput!): User!
   deleteBook(id: ID!): Book!
   login(input: LoginInput!): User!
+  logout: Boolean!
   updateBook(id: ID!, input: BookInput!): Book!
 }
 
@@ -36,10 +37,15 @@ type Query {
   users: [User!]!
 }
 
+type Subscription {
+  userStatusUpdated: User!
+}
+
 type User {
   access_token: String!
   email: String!
   id: String!
+  is_online: Boolean!
   name: String!
   password: String!
 }

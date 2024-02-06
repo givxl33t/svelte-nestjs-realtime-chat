@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context, Subscription } from '@nestjs/graphql';
 import { User } from './user.model';
 import { UserService } from './users.service';
 import { UserInput, LoginInput } from './user.input';
@@ -6,6 +6,9 @@ import { PasswordService } from "src/utils/password.util";
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/guards/jwtAuth.guard';
 import { UseGuards } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
 
 @Resolver(() => User)
 export class UserResolver {
@@ -15,10 +18,17 @@ export class UserResolver {
     private readonly jwtService: JwtService
   ) {}
 
+  @Subscription(() => User)
+  userStatusUpdated() {
+    return pubSub.asyncIterator(`userStatusUpdated`);
+  }
+
   @Query(() => [User])
   @UseGuards(JwtAuthGuard)
-  async users(): Promise<User[]> {
-    return this.userService.findAll();
+  async users(@Context() context): Promise<User[]> {
+    const userId = context.req.user.id;
+    let users = await this.userService.findAll();
+    return users.filter(user => user.id !== userId);
   }
 
   @Query(() => User)
@@ -55,10 +65,40 @@ export class UserResolver {
       throw new Error('Invalid credentials');
     }
 
-    const payload = { email: user.email, name: user.name, sub: user.id,  };
+    const payload = { email: user.email, name: user.name, sub: user.id };
     const access_token = this.jwtService.sign(payload);
     user.access_token = access_token;
+
+    await this.userService.update(user.id, { 
+      email: user.email,
+      name: user.name,
+      password: user.password,
+      is_online: true,
+    }).then(() => {
+      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: user.id, is_online: true } });
+    })
     
     return user
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async logout(@Context() context): Promise<boolean> {
+    const userId = context.req.user.id;
+
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    await this.userService.update(userId, { 
+      email: user.email,
+      name: user.name,
+      password: user.password,
+      is_online: false,
+    }).then(() => {
+      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: userId, is_online: false } });
+    })
+    return true;
   }
 }

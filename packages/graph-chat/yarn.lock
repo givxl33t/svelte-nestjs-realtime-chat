@@ -3451,6 +3451,13 @@ graphemer@^1.4.0:
   resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
+graphql-subscriptions@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-2.0.0.tgz#11ec181d475852d8aec879183e8e1eb94f2eb79a"
+  integrity sha512-s6k2b8mmt9gF9pEfkxsaO1lTxaySfKoEJzEfmwguBbQ//Oq23hIXCfR1hm4kdh5hnR20RdwB+s3BCb+0duHSZA==
+  dependencies:
+    iterall "^1.3.0"
+
 graphql-tag@2.12.6, graphql-tag@^2.11.0, graphql-tag@^2.12.6:
   version "2.12.6"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.12.6.tgz#d441a569c1d2537ef10ca3d1633b48725329b5f1"
@@ -3472,6 +3479,11 @@ graphql-ws@5.14.2:
   version "5.14.2"
   resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.14.2.tgz#7db6f6138717a544d9480f0213f65f2841ed1c52"
   integrity sha512-LycmCwhZ+Op2GlHz4BZDsUYHKRiiUz+3r9wbhBATMETNlORQJAaFlAgTFoeRh6xQoQegwYwIylVD1Qns9/DA3w==
+
+graphql-ws@^5.14.3:
+  version "5.14.3"
+  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.14.3.tgz#fb1fba011a0ae9c4e86d831cae2ec27955168b9a"
+  integrity sha512-F/i2xNIVbaEF2xWggID0X/UZQa2V8kqKDPO8hwmu53bVOcTL7uNkxnexeEgSCVxYBQUTUNEI8+e4LO1FOhKPKQ==
 
 graphql@*, graphql@^16.8.1:
   version "16.8.1"
@@ -3787,7 +3799,7 @@ istanbul-reports@^3.1.3:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
 
-iterall@1.3.0, iterall@^1.2.1:
+iterall@1.3.0, iterall@^1.2.1, iterall@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.3.0.tgz#afcb08492e2915cbd8a0884eb93a8c94d0d72fea"
   integrity sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==
@@ -5503,7 +5515,7 @@ strip-json-comments@^3.1.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
-subscriptions-transport-ws@0.11.0:
+subscriptions-transport-ws@0.11.0, subscriptions-transport-ws@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/subscriptions-transport-ws/-/subscriptions-transport-ws-0.11.0.tgz#baf88f050cba51d52afe781de5e81b3c31f89883"
   integrity sha512-8D4C6DIH5tGiAIpp5I0wD/xRlNiZAPGHygzCe7VzyzUoxHtawzjNAY9SUTXU05/EY2NMY9/9GF0ycizkXr1CWQ==

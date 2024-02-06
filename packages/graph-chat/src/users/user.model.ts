@@ -23,6 +23,10 @@ export class User {
     password: string;
 
     @Field()
+    @Prop({ type: Boolean, default: false })
+    is_online?: boolean;
+
+    @Field()
     access_token?: string;
 }
 

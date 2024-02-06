@@ -1,6 +1,8 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { sveltekit } from '@sveltejs/kit/vite'
+import houdini from 'houdini/vite'
 
-export default defineConfig({
-	plugins: [sveltekit()]
-});
+const config = {
+	plugins: [houdini(), sveltekit()]
+};
+
+export default config;
