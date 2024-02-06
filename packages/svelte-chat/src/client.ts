@@ -1,23 +1,9 @@
 import { HoudiniClient } from '$houdini';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { browser } from '$app/environment';
+import { createClient } from 'graphql-ws';
 import { subscription } from '$houdini/plugins';
 
 const accessToken = browser ? localStorage.getItem('access_token') : '';
-
-function createClient() {
-    const client = new SubscriptionClient('ws://localhost:5000/graphql', {
-        reconnect: true,
-    });
-
-    return {
-        subscribe(payload: any, handlers: any) {
-            const { unsubscribe } = client.request(payload).subscribe(handlers);
-
-            return unsubscribe
-        }
-    }
-}
 
 export default new HoudiniClient({
     url: 'http://localhost:5000/graphql',
@@ -28,5 +14,9 @@ export default new HoudiniClient({
             },
         };
     },
-    plugins: [subscription(createClient)],
+    plugins: [
+        subscription(() => createClient({
+            url: 'ws://localhost:5000/graphql',
+        }))
+    ],
 })
