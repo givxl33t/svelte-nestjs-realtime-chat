@@ -9,6 +9,8 @@ import jwtConfig from './config/jwt.config';
 
 import { UsersModule } from './users/users.module';
 import { BooksModule } from './books/books.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { BooksModule } from './books/books.module';
       driver: ApolloDriver,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        autoSchemaFile: join(process.cwd(), '../svelte-chat/schema.graphql'),
+        autoSchemaFile: join(process.cwd(), '../schema.gql'),
         context: ({ req, res }) => ({ req, res }),
         installSubscriptionHandlers: true,
         subscriptions: {
@@ -44,6 +46,8 @@ import { BooksModule } from './books/books.module';
     }),
     UsersModule,
     BooksModule,
+    RoomsModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

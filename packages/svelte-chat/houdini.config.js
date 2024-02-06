@@ -2,7 +2,7 @@
 
 /** @type {import('houdini').ConfigFile} */
 const config = {
-    "schemaPath": "./schema.graphql",
+    "schemaPath": "../schema.gql",
     "plugins": {
         "houdini-svelte": {}
     }

@@ -11,7 +11,7 @@
 	let usersData = [];
 
 	const store = graphql`
-		query Users @load {
+		query Users {
 			users {
 				id
 				name
@@ -22,8 +22,10 @@
 	`;
 
 	onMount(async () => {
-		const users = await store.fetch();
-		usersData = users.data.users;
+		const { data } = await store.fetch({
+			policy: 'NetworkOnly'
+		});
+		usersData = data.users;
 	});
 
 	const listener = graphql`
@@ -49,7 +51,7 @@
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="Svelte demo" />
 </svelte:head>
 
 <section>

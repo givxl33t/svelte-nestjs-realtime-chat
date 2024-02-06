@@ -20,7 +20,7 @@ export class User {
 
     @Field()
     @Prop({ type: String })
-    password: string;
+    password?: string;
 
     @Field()
     @Prop({ type: Boolean, default: false })
