@@ -1,6 +1,7 @@
 <!-- Header.svelte -->
 <script>
 // @ts-nocheck
+	import Swal from 'sweetalert2';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { isAuthenticated, currentUser, updateCurrentUser } from '$lib/stores/auth';
@@ -12,7 +13,7 @@
 	$: isAuthenticatedValue = $isAuthenticated;
 
 	const store = graphql`
-		query Me @load {
+		query Me {
 			me {
 				id
 				name
@@ -22,6 +23,13 @@
 		
 	onMount(async () => {
 		const user = await store.fetch();
+
+		if (user.data) {
+			isAuthenticated.set(true);
+		} else {
+			isAuthenticated.set(false);
+		}
+
 		updateCurrentUser(user.data);
 	});
 
@@ -35,12 +43,25 @@
 		const res = await logout.mutate();
 
 		if (res.data.logout) {
-			localStorage.removeItem('access_token');
 			isAuthenticated.set(false);
 			updateCurrentUser(null);
 		} else {
 			console.error('Failed to logout');
 		}
+	}
+
+	async function logoutConfirmation() {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: 'You will be logged out',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, log me out!',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				handleLogout();
+			}
+		});
 	}
 </script>
 
@@ -69,7 +90,7 @@
 				</li>
 			{:else}
 				<li aria-current={$page.url.pathname === '/logout' ? 'page' : undefined}>
-					<a href="/" on:click={handleLogout}>Logout</a>
+					<a href="/" on:click={logoutConfirmation}>Logout</a>
 				</li>
 			{/if}
 		</ul>

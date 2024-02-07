@@ -1,17 +1,23 @@
 import { writable } from 'svelte/store';
 
-// Check if localStorage is available
-const isLocalStorageAvailable = typeof localStorage !== 'undefined';
+// Initialize the store based on access_token cookie
+export const isAuthenticated = writable(false);
 
-// Initialize the store based on localStorage availability
-export const isAuthenticated = writable(isLocalStorageAvailable && !!localStorage.getItem('access_token'));
+// type to define the user object
+export type CurrentUser = {
+  me: {
+    id: string;
+    email: string;
+    name: string;
+  };
+};
 
 // Initialize the current user store
-export const currentUser = writable({ 
-  me : {
-    id: null,
-    email: null,
-    name: null,
+export const currentUser = writable<CurrentUser>({ 
+  me: {
+    id: '',
+    email: '',
+    name: '',
   } 
 });
 

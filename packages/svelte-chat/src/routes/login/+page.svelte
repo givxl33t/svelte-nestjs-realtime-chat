@@ -2,11 +2,21 @@
 <script>
 // @ts-nocheck
   import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
   import { currentUser, isAuthenticated } from "$lib/stores/auth";
   import { graphql } from "$houdini";
+  import Swal from 'sweetalert2';
 
   let email = '';
   let password = '';
+
+  $: isAuthenticatedValue = $isAuthenticated;
+
+  onMount(async () => {
+    if (isAuthenticatedValue) {
+      goto('/');
+    }
+  });
 
   async function handleLogin() {
     const login = graphql`
@@ -15,9 +25,9 @@
           email: $email,
           password: $password
         }) {
-          name
+          id
           email
-          access_token
+          name
         }
       }
     `;
@@ -25,15 +35,13 @@
     const res = await login.mutate({ email, password });
 
     if (!res.errors) {
-      localStorage.setItem('access_token', res.data.login.access_token);
-
       isAuthenticated.set(true);
       currentUser.set({ me: res.data.login });
 
-      window.alert('Login successful');
       goto('/');
+      Swal.fire('Login successful')
     } else {
-      window.alert(res.errors[0].message);
+      Swal.fire(res.errors[0].message);
     }
   }
 </script>

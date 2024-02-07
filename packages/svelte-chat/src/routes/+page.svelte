@@ -1,17 +1,19 @@
 <script>
 // @ts-nocheck
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
 	import { isAuthenticated } from '$lib/stores/auth';
 	import { graphql } from '$houdini';
+  import { usersData, updateUsers, updateSingleUser } from '$lib/stores/users';
+	import Swal from 'sweetalert2';
 
+	$: users = $usersData;
 	$: isAuthenticatedValue = $isAuthenticated;
 
-	let usersData = [];
-
 	const store = graphql`
-		query Users @load {
+		query Users {
 			users {
 				id
 				name
@@ -22,8 +24,10 @@
 	`;
 
 	onMount(async () => {
-		const users = await store.fetch();
-		usersData = users.data.users;
+		const users = await store.fetch({
+			policy: "NetworkOnly"
+		})
+		updateUsers(users.data.users);
 	});
 
 	const listener = graphql`
@@ -39,17 +43,63 @@
 	$: {
 		if ($listener.data) {
 			const updatedUser = $listener.data.userStatusUpdated;
-			const index = usersData.findIndex((user) => user.id === updatedUser.id);
+			const index = users.findIndex((user) => user.id === updatedUser.id);
 			if (index !== -1) {
-				usersData[index].is_online = updatedUser.is_online;
+				users[index].is_online = updatedUser.is_online;
+				updateSingleUser(users[index]);
 			}
 		}
 	}
+
+	async function createChatRoom(userId) {
+		const chatroom = graphql`
+			mutation CreateRoom($recipientId: ID!) {
+				createRoom(recipientId: $recipientId) {
+					id
+				}
+			}
+		`;
+
+		const res = await chatroom.mutate({ recipientId: userId });
+		goto(`/room/${res.data.createRoom.id}`);
+	}
+
+	async function handleUserClick(userId) {
+		const roomToUser = graphql`
+			query RoomToUser($to: ID!) {
+				roomToUser(to: $to) {
+					id
+				}
+			}`
+
+		const room = await roomToUser.fetch({
+			variables: {
+				to: userId
+			}
+		});
+
+		if (room.data !== null) {
+			goto(`/room/${room.data.roomToUser.id}`);
+		} else {
+			Swal.fire({
+				title: 'Create Chat Room?',
+				text: 'You have not chatted with this user before. Do you want to create a chat room?',
+				icon: 'info',
+				confirmButtonText: 'Sure! Create it!',
+				showCancelButton: true,
+			}).then(async (result) => {
+				if (result.isConfirmed) {
+					await createChatRoom(userId);
+				}
+			});
+		}
+	}
+
 </script>
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="Svelte demo" />
 </svelte:head>
 
 <section>
@@ -66,19 +116,19 @@
 		<p class="text-2xl font-semibold underline text-center">Other Users</p>
 		<div class="flex justify-center text-center">
 			{#if isAuthenticatedValue}
-				{#if usersData.length > 0}
+				{#if users.length > 0}
 					<ul>
-						{#each usersData as user}
+						{#each users as user}
 							<li class="my-3">
-								<a href={`/`}>
-								<div class="p-2 border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
-									<p>ID : {user.id}</p>
-									<p>{user.name}</p>
-									<p>{user.email}</p>
-									<p class="font-bold {user.is_online ? "text-green-600" : "text-red-600"}">
-										{user.is_online ? 'Online' : 'Offline'}
-									</p>
-								</div>
+								<a href={`#`} on:click={() => handleUserClick(user.id)}>
+									<div class="p-2 border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
+										<p>ID : {user.id}</p>
+										<p>{user.name}</p>
+										<p>{user.email}</p>
+										<p class="font-bold {user.is_online ? "text-green-600" : "text-red-600"}">
+											{user.is_online ? 'Online' : 'Offline'}
+										</p>
+									</div>
 								</a>
 							</li>
 						{/each}

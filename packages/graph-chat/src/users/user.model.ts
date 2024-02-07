@@ -20,14 +20,20 @@ export class User {
 
     @Field()
     @Prop({ type: String })
-    password: string;
+    password?: string;
 
     @Field()
     @Prop({ type: Boolean, default: false })
     is_online?: boolean;
+}
+
+@ObjectType()
+export class UserStatusSubscription {
+    @Field()
+    id: string;
 
     @Field()
-    access_token?: string;
+    is_online: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

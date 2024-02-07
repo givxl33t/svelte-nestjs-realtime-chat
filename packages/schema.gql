@@ -1,7 +1,3 @@
-# ------------------------------------------------------
-# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
-# ------------------------------------------------------
-
 type Book {
   author: String!
   id: String!
@@ -15,13 +11,34 @@ input BookInput {
   title: String!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 input LoginInput {
   email: String!
   password: String!
 }
 
+type Message {
+  createdAt: DateTime!
+  id: String!
+  room: Room!
+  text: String!
+  updatedAt: DateTime!
+  user: User!
+}
+
+input MessageInput {
+  room: String!
+  text: String!
+}
+
 type Mutation {
   createBook(input: BookInput!): Book!
+  createMessage(input: MessageInput!): Message!
+  createRoom(recipientId: ID!): Room!
   createUser(input: UserInput!): User!
   deleteBook(id: ID!): Book!
   login(input: LoginInput!): User!
@@ -33,16 +50,27 @@ type Query {
   book(id: ID!): Book!
   books: [Book!]!
   me: User!
+  message(id: ID!): Message!
+  messages: [Message!]!
+  room(id: ID!): Room!
+  roomToUser(to: ID!): Room!
+  rooms: [Room!]!
   user(id: ID!): User!
   users: [User!]!
 }
 
+type Room {
+  id: String!
+  messages: [Message!]!
+  users: [User!]!
+}
+
 type Subscription {
-  userStatusUpdated: User!
+  messageCreated: Message!
+  userStatusUpdated: UserStatusSubscription!
 }
 
 type User {
-  access_token: String!
   email: String!
   id: String!
   is_online: Boolean!
@@ -54,4 +82,9 @@ input UserInput {
   email: String!
   name: String!
   password: String!
+}
+
+type UserStatusSubscription {
+  id: String!
+  is_online: Boolean!
 }
