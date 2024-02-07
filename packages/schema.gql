@@ -66,11 +66,11 @@ type Room {
 }
 
 type Subscription {
-  userStatusUpdated: User!
+  messageCreated: Message!
+  userStatusUpdated: UserStatusSubscription!
 }
 
 type User {
-  access_token: String!
   email: String!
   id: String!
   is_online: Boolean!
@@ -82,4 +82,9 @@ input UserInput {
   email: String!
   name: String!
   password: String!
+}
+
+type UserStatusSubscription {
+  id: String!
+  is_online: Boolean!
 }

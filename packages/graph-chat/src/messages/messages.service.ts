@@ -33,6 +33,11 @@ export class MessageService {
     await this.roomModel.findByIdAndUpdate
       (room, { $push: { messages: createdMessage.id } });
 
-    return createdMessage;
+    const populatedMessage = await this.messageModel.findById(createdMessage.id)
+      .populate('user')
+      .populate('room')
+      .exec();
+
+    return populatedMessage;
   }
 }

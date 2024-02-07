@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID, Context, Subscription } from '@nestjs/graphql';
-import { User } from './user.model';
+import { User, UserStatusSubscription } from './user.model';
 import { UserService } from './users.service';
 import { UserInput, LoginInput } from './user.input';
 import { PasswordService } from "src/utils/password.util";
@@ -18,7 +18,7 @@ export class UserResolver {
     private readonly jwtService: JwtService
   ) {}
 
-  @Subscription(() => User)
+  @Subscription(() => UserStatusSubscription)
   userStatusUpdated() {
     return pubSub.asyncIterator(`userStatusUpdated`);
   }
@@ -70,7 +70,6 @@ export class UserResolver {
 
     const payload = { email: user.email, name: user.name, sub: user.id };
     const access_token = this.jwtService.sign(payload);
-    user.access_token = access_token;
 
     context.res.cookie('access_token', access_token, {
       httpOnly: true,
@@ -84,8 +83,8 @@ export class UserResolver {
       name: user.name,
       password: user.password,
       is_online: true,
-    }).then(() => {
-      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: user.id, is_online: true } });
+    }).then((updatedUser) => {
+      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
     })
     
     return user
@@ -107,8 +106,8 @@ export class UserResolver {
       name: user.name,
       password: user.password,
       is_online: false,
-    }).then(() => {
-      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: userId, is_online: false } });
+    }).then((updatedUser) => {
+      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
     })
     return true;
   }

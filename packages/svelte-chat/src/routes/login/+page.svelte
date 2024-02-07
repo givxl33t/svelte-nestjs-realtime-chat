@@ -25,9 +25,9 @@
           email: $email,
           password: $password
         }) {
-          name
+          id
           email
-          access_token
+          name
         }
       }
     `;

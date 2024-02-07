@@ -1,12 +1,13 @@
 <script>
 // @ts-nocheck
-	import Swal from 'sweetalert2';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
 	import { isAuthenticated } from '$lib/stores/auth';
 	import { graphql } from '$houdini';
   import { usersData, updateUsers, updateSingleUser } from '$lib/stores/users';
+	import Swal from 'sweetalert2';
 
 	$: users = $usersData;
 	$: isAuthenticatedValue = $isAuthenticated;
@@ -49,6 +50,33 @@
 			}
 		}
 	}
+
+	async function handleUserClick(userId) {
+		const roomToUser = graphql`
+			query RoomToUser($to: ID!) {
+				roomToUser(to: $to) {
+					id
+				}
+			}`
+
+		const room = await roomToUser.fetch({
+			variables: {
+				to: userId
+			}
+		});
+
+		if (room.data !== null) {
+			goto(`/room/${room.data.roomToUser.id}`);
+		} else {
+			Swal.fire({
+				title: 'Error',
+				text: 'Method not implemented yet!',
+				icon: 'error',
+				confirmButtonText: 'Ok'
+			});
+		}
+	}
+
 </script>
 
 <svelte:head>
@@ -74,7 +102,7 @@
 					<ul>
 						{#each users as user}
 							<li class="my-3">
-								<a href={`#`} on:click={() => {Swal.fire('hello sweet alert')}}>
+								<a href={`#`} on:click={() => handleUserClick(user.id)}>
 									<div class="p-2 border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
 										<p>ID : {user.id}</p>
 										<p>{user.name}</p>
