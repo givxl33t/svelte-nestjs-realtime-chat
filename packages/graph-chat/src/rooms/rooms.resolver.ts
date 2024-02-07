@@ -21,6 +21,19 @@ export class RoomResolver {
     return this.roomsService.findOne(id);
   }
 
+  @Query(() => Room)
+  @UseGuards(JwtAuthGuard)
+  async roomToUser(
+    @Context() context,
+    @Args('to', { type: () => ID}) id: string): Promise<Room> {
+    const userIds = [context.req.user.id, id];
+    const existingRoom = await this.roomsService.findOneByUsers(userIds);
+    if (!existingRoom) {
+      throw new Error('Room not found');
+    }
+    return existingRoom;
+  }
+  
   @Mutation(() => Room)
   @UseGuards(JwtAuthGuard)
   async createRoom(

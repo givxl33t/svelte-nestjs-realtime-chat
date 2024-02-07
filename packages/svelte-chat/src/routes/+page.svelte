@@ -1,14 +1,15 @@
 <script>
 // @ts-nocheck
+	import Swal from 'sweetalert2';
 	import { onMount } from 'svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
 	import { isAuthenticated } from '$lib/stores/auth';
 	import { graphql } from '$houdini';
+  import { usersData, updateUsers, updateSingleUser } from '$lib/stores/users';
 
+	$: users = $usersData;
 	$: isAuthenticatedValue = $isAuthenticated;
-
-	let usersData = [];
 
 	const store = graphql`
 		query Users {
@@ -22,10 +23,10 @@
 	`;
 
 	onMount(async () => {
-		const { data } = await store.fetch({
-			policy: 'NetworkOnly'
-		});
-		usersData = data.users;
+		const users = await store.fetch({
+			policy: "NetworkOnly"
+		})
+		updateUsers(users.data.users);
 	});
 
 	const listener = graphql`
@@ -41,9 +42,10 @@
 	$: {
 		if ($listener.data) {
 			const updatedUser = $listener.data.userStatusUpdated;
-			const index = usersData.findIndex((user) => user.id === updatedUser.id);
+			const index = users.findIndex((user) => user.id === updatedUser.id);
 			if (index !== -1) {
-				usersData[index].is_online = updatedUser.is_online;
+				users[index].is_online = updatedUser.is_online;
+				updateSingleUser(users[index]);
 			}
 		}
 	}
@@ -68,19 +70,19 @@
 		<p class="text-2xl font-semibold underline text-center">Other Users</p>
 		<div class="flex justify-center text-center">
 			{#if isAuthenticatedValue}
-				{#if usersData.length > 0}
+				{#if users.length > 0}
 					<ul>
-						{#each usersData as user}
+						{#each users as user}
 							<li class="my-3">
-								<a href={`/`}>
-								<div class="p-2 border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
-									<p>ID : {user.id}</p>
-									<p>{user.name}</p>
-									<p>{user.email}</p>
-									<p class="font-bold {user.is_online ? "text-green-600" : "text-red-600"}">
-										{user.is_online ? 'Online' : 'Offline'}
-									</p>
-								</div>
+								<a href={`#`} on:click={() => {Swal.fire('hello sweet alert')}}>
+									<div class="p-2 border-2 border-slate-400 shadow-md rounded-xl hover:shadow-xl transition duration-300">
+										<p>ID : {user.id}</p>
+										<p>{user.name}</p>
+										<p>{user.email}</p>
+										<p class="font-bold {user.is_online ? "text-green-600" : "text-red-600"}">
+											{user.is_online ? 'Online' : 'Offline'}
+										</p>
+									</div>
 								</a>
 							</li>
 						{/each}

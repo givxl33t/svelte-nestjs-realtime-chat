@@ -54,7 +54,10 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async login(@Args('input') input: LoginInput): Promise<User> {
+  async login(
+      @Context() context,
+      @Args('input') input: LoginInput
+    ): Promise<User> {
     const user = await this.userService.findByEmail(input.email);
     if (!user) {
       throw new Error('Invalid credentials');
@@ -68,6 +71,13 @@ export class UserResolver {
     const payload = { email: user.email, name: user.name, sub: user.id };
     const access_token = this.jwtService.sign(payload);
     user.access_token = access_token;
+
+    context.res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: false,
+      signed: false,
+    });
+
 
     await this.userService.update(user.id, { 
       email: user.email,
@@ -84,6 +94,7 @@ export class UserResolver {
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async logout(@Context() context): Promise<boolean> {
+    context.res.clearCookie('access_token');
     const userId = context.req.user.id;
 
     const user = await this.userService.findOne(userId);

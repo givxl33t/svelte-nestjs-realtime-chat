@@ -25,6 +25,13 @@ export class RoomService {
       .exec();
   }
 
+  async findOneByUsers(userIds: string[]): Promise<Room> {
+    return this.roomModel.findOne({ users: { $all: userIds } })
+      .populate('users')
+      .populate({ path: 'messages', populate: { path: 'user' } })
+      .exec();
+  }
+
   async create(userIds: string[]): Promise<Room> {
     const users = await this.userModel.find({ _id: { $in: userIds } });
     const newRoom = new this.roomModel({ users });
