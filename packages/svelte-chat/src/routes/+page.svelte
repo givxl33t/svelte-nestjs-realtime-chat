@@ -51,6 +51,19 @@
 		}
 	}
 
+	async function createChatRoom(userId) {
+		const chatroom = graphql`
+			mutation CreateRoom($recipientId: ID!) {
+				createRoom(recipientId: $recipientId) {
+					id
+				}
+			}
+		`;
+
+		const res = await chatroom.mutate({ recipientId: userId });
+		goto(`/room/${res.data.createRoom.id}`);
+	}
+
 	async function handleUserClick(userId) {
 		const roomToUser = graphql`
 			query RoomToUser($to: ID!) {
@@ -69,10 +82,15 @@
 			goto(`/room/${room.data.roomToUser.id}`);
 		} else {
 			Swal.fire({
-				title: 'Error',
-				text: 'Method not implemented yet!',
-				icon: 'error',
-				confirmButtonText: 'Ok'
+				title: 'Create Chat Room?',
+				text: 'You have not chatted with this user before. Do you want to create a chat room?',
+				icon: 'info',
+				confirmButtonText: 'Sure! Create it!',
+				showCancelButton: true,
+			}).then(async (result) => {
+				if (result.isConfirmed) {
+					await createChatRoom(userId);
+				}
 			});
 		}
 	}

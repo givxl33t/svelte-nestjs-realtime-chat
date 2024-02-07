@@ -4,6 +4,11 @@ export const _houdini_load = graphql`
   query Room($roomId: ID!) {
     room(id: $roomId) {
       id
+      users {
+        id
+        name
+        is_online
+      }
       messages {
         id
         text
