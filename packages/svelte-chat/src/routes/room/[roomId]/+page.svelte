@@ -2,7 +2,8 @@
   import { currentUser } from '$lib/stores/auth';
   import { graphql, cache } from '$houdini';
   import { page } from '$app/stores';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount, afterUpdate } from 'svelte';
+  import Icon from '@iconify/svelte';
 
   /** @type { import('./$houdini').PageData } */
   export let data;
@@ -42,17 +43,6 @@
 		}
 	`;
 
-  $: userStatusListener.listen();
-  $: {
-    if ($userStatusListener.data) {
-      const updatedUser = $userStatusListener.data.userStatusUpdated;
-      if (updatedUser.id === recipient?.id) {
-        // @ts-ignore
-        recipient.is_online = updatedUser.is_online;
-      }
-    }
-  }
-
   const message = graphql`
     mutation CreateMessage($room: String!, $text: String!) {
       createMessage(input: { room: $room, text: $text }) {
@@ -67,10 +57,23 @@
     }
   `
 
+  $: userStatusListener.listen();
+  $: {
+    if ($userStatusListener.data) {
+      const updatedUser = $userStatusListener.data.userStatusUpdated;
+      if (updatedUser.id === recipient?.id) {
+        // @ts-ignore
+        recipient.is_online = updatedUser.is_online;
+      }
+    }
+  }
+
   $: listener.listen();
   $: {
     if ($listener.data) {
-      Room.fetch({ policy: 'NetworkOnly' })
+      if ($listener.data.messageCreated.room.id === $page.params.roomId) {
+        Room.fetch({ policy: 'NetworkOnly' })
+      }
     }
   }
 
@@ -83,6 +86,25 @@
       messageText = '';
     }
   }
+
+  /**
+     * @type {HTMLDivElement}
+     */
+  let messagesContainer;
+
+  const scrollToBottom = () => {
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  };
+
+  onMount(() => {
+    scrollToBottom();
+  });
+
+  afterUpdate(() => {
+    scrollToBottom();
+  });
 </script>
 
 <div class="mt-24 flex items-center justify-center">
@@ -96,14 +118,24 @@
         {recipient?.is_online ? 'Online' : 'Offline'}
       </p>
 
-      <div class="border-t border-b overflow-y-auto max-h-96 p-4">
-        {#each currentRoom.messages as message (message.id) }
-          <div class="mb-4 { message.user.id === currUser.me.id ? "text-right ml-auto" : "text-left" }">
-            <p class="text-gray-500 mb-1">{message.user.name}:</p>
-            <p>{message.text}</p>
-            <p class="text-xs text-gray-400">{message.createdAt.toLocaleString()}</p>
+      <div bind:this={messagesContainer} class="border-t border-b overflow-y-auto max-h-96 p-4">
+        {#if currentRoom.messages.length === 0}
+          <div class="justify-center text-center space-y-1 py-4">
+            <p class="font-semibold text-lg">
+              Uh oh! No messages yet.
+            </p>
+            <div class="text-center justify-center flex"><Icon icon="et:chat" width="96" height="96" /></div>
+            <span>Become the first to send a message!</span>
           </div>
-        {/each}
+        {:else}
+          {#each currentRoom.messages as message (message.id) }
+            <div class="mb-4 { message.user.id === currUser.me.id ? "text-right ml-auto" : "text-left" }">
+              <p class="text-gray-500 mb-1">{message.user.name}:</p>
+              <p>{message.text}</p>
+              <p class="text-xs text-gray-400">{message.createdAt.toLocaleString()}</p>
+            </div>
+          {/each}
+        {/if}
       </div>
 
       <!-- Add message input and send button here -->

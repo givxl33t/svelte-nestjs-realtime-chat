@@ -37,4 +37,8 @@ export class RoomService {
     const newRoom = new this.roomModel({ users });
     return newRoom.save();
   }
+
+  async delete(id: string): Promise<Room> {
+    return this.roomModel.findByIdAndDelete(id).exec();
+  }
 }

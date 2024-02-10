@@ -3,24 +3,23 @@ import { User, UserStatusSubscription } from './user.model';
 import { UserService } from './users.service';
 import { UserInput, LoginInput } from './user.input';
 import { PasswordService } from "src/utils/password.util";
+import { PubSubService } from 'src/utils/pubSub.util';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/guards/jwtAuth.guard';
 import { UseGuards } from '@nestjs/common';
-import { PubSub } from 'graphql-subscriptions';
-
-const pubSub = new PubSub();
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private readonly userService: UserService, 
     private readonly passwordService: PasswordService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly pubSubService: PubSubService
   ) {}
 
   @Subscription(() => UserStatusSubscription)
   userStatusUpdated() {
-    return pubSub.asyncIterator(`userStatusUpdated`);
+    return this.pubSubService.getChannel(`userStatusUpdated`);
   }
 
   @Query(() => [User])
@@ -84,7 +83,17 @@ export class UserResolver {
       password: user.password,
       is_online: true,
     }).then((updatedUser) => {
-      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
+      this.pubSubService.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
+      setTimeout(async () => {
+        await this.userService.update(updatedUser.id, { 
+          email: updatedUser.email,
+          name: updatedUser.name,
+          password: updatedUser.password,
+          is_online: false,
+        }).then((offlineUser) => {
+          this.pubSubService.publish(`userStatusUpdated`, { userStatusUpdated: { id: offlineUser.id, is_online: offlineUser.is_online } });
+        })
+      }, 30000);
     })
     
     return user
@@ -107,7 +116,7 @@ export class UserResolver {
       password: user.password,
       is_online: false,
     }).then((updatedUser) => {
-      pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
+      this.pubSubService.pubSub.publish(`userStatusUpdated`, { userStatusUpdated: { id: updatedUser.id, is_online: updatedUser.is_online } });
     })
     return true;
   }

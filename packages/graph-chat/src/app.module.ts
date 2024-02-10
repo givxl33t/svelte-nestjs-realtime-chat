@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { BooksModule } from './books/books.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { MessagesModule } from './messages/messages.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { MessagesModule } from './messages/messages.module';
     BooksModule,
     RoomsModule,
     MessagesModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

@@ -4,6 +4,7 @@ import { UserService } from "./users.service";
 import { UserResolver } from "./users.resolver";
 import { User, UserSchema } from "./user.model";
 import { PasswordService } from "src/utils/password.util";
+import { PubSubService } from "src/utils/pubSub.util";
 import { JwtModule as NestJwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from "src/guards/passportStrategy.guard";
@@ -14,6 +15,7 @@ import { JwtStrategy } from "src/guards/passportStrategy.guard";
     PasswordService,
     UserResolver,
     JwtStrategy,
+    PubSubService,
   ],
   imports: [
     MongooseModule.forFeatureAsync([

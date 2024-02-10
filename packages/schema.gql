@@ -43,7 +43,23 @@ type Mutation {
   deleteBook(id: ID!): Book!
   login(input: LoginInput!): User!
   logout: Boolean!
+  readNotifications(ids: [String!]!): Boolean!
   updateBook(id: ID!, input: BookInput!): Book!
+}
+
+type Notification {
+  createdAt: DateTime!
+  id: String!
+  metadata: [NotificationMetadata!]!
+  read: Boolean!
+  receiver: User!
+  text: String!
+  updatedAt: DateTime!
+}
+
+type NotificationMetadata {
+  key: String!
+  value: String!
 }
 
 type Query {
@@ -52,6 +68,7 @@ type Query {
   me: User!
   message(id: ID!): Message!
   messages: [Message!]!
+  myNotifications(limit: Float): [Notification!]!
   room(id: ID!): Room!
   roomToUser(to: ID!): Room!
   rooms: [Room!]!
@@ -67,6 +84,7 @@ type Room {
 
 type Subscription {
   messageCreated: Message!
+  notificationCreated: Notification!
   userStatusUpdated: UserStatusSubscription!
 }
 
