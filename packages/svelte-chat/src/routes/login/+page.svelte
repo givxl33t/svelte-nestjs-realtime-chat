@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { currentUser, isAuthenticated } from "$lib/stores/auth";
+  import { updateNotifications } from '$lib/stores/notification';
   import { graphql } from "$houdini";
   import Swal from 'sweetalert2';
 
@@ -17,6 +18,29 @@
       goto('/');
     }
   });
+
+  async function Notifications() {
+		const notifications = graphql`
+			query Notifications {
+				myNotifications {
+					id
+					text
+					read
+					createdAt
+					metadata {
+            key
+            value
+        	}
+				}
+			}
+		`;
+
+		const res = await notifications.fetch({ policy: 'NetworkOnly' });
+
+		if (res.data) {
+			updateNotifications(res.data.myNotifications);
+		}
+	}
 
   async function handleLogin() {
     const login = graphql`
@@ -37,6 +61,7 @@
     if (!res.errors) {
       isAuthenticated.set(true);
       currentUser.set({ me: res.data.login });
+      await Notifications();
 
       goto('/');
       Swal.fire('Login successful')

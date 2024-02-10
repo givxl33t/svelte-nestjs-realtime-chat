@@ -8,7 +8,7 @@ import { Room, RoomDocument } from "../rooms/room.model";
 export class MessageService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
-    @InjectModel(Room.name) private roomModel: Model<RoomDocument>
+    @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
   ) {}
 
   async findAll(): Promise<Message[]> {
@@ -25,19 +25,21 @@ export class MessageService {
       .exec();
   }
 
-  async create(message: Message): Promise<Message> {
-    const { room } = message;
-    const newMessage = new this.messageModel(message);
+  async create(roomId: string, messengerId: string, messageText: string): Promise<Message> {
+    const newMessage = new this.messageModel({
+      room: roomId,
+      user: messengerId,
+      text: messageText
+    
+    });
     const createdMessage = await newMessage.save();
 
     await this.roomModel.findByIdAndUpdate
-      (room, { $push: { messages: createdMessage.id } });
+      (roomId, { $push: { messages: createdMessage.id } }).populate('users').exec();
 
-    const populatedMessage = await this.messageModel.findById(createdMessage.id)
+    return this.messageModel.findById(createdMessage.id)
       .populate('user')
       .populate('room')
       .exec();
-
-    return populatedMessage;
   }
 }

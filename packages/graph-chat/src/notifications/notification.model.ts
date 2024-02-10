@@ -2,28 +2,36 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 import { User } from "../users/user.model";
-import { Room } from "src/rooms/room.model";
 import * as mongoose from "mongoose";
 
-export type MessageDocument = Message & Document;
+export type NotificationDocument = Notification & Document;
+
+@ObjectType()
+class NotificationMetadata {
+    @Field()
+    key: string;
+
+    @Field()
+    value: string;
+}
 
 @ObjectType()
 @Schema({ timestamps: true })
-export class Message {
+export class Notification {
     @Field()
     id?: string;
 
-    @Field(() => Room)
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Room'})
-    room: Room;
-
     @Field(() => User)
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-    user: User;
+    receiver: User;
 
     @Field()
     @Prop({ type: String })
     text: string;
+
+    @Field(() => [NotificationMetadata])
+    @Prop({ type: [Object] })
+    metadata: NotificationMetadata[];
 
     @Field()
     @Prop({ type: Date })
@@ -32,7 +40,10 @@ export class Message {
     @Field()
     @Prop({ type: Date })
     updatedAt?: Date;
+
+    @Field()
+    @Prop({ type: Boolean, default: false })
+    read?: boolean;
 }
 
-export const MessageSchema = SchemaFactory.createForClass(Message);
-
+export const NotificationSchema = SchemaFactory.createForClass(Notification);
