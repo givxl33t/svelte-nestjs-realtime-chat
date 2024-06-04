@@ -166,6 +166,9 @@
 				<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
 					<a href="/login">Login</a>
 				</li>
+				<li aria-current={$page.url.pathname === '/register' ? 'page' : undefined}>
+					<a href="/register">Register</a>
+				</li>
 			{:else}
 				<li aria-current={$page.url.pathname === '/logout' ? 'page' : undefined}>
 					<a href="/" on:click={logoutConfirmation}>Logout</a>
